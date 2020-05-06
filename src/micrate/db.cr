@@ -3,7 +3,8 @@ require "./db/*"
 
 module Micrate
   module DB
-    @@connection_url = ENV["DB_URL"]?
+    @@connection_url = ENV["DATABASE_URL"]?
+    @@deprecated_connection_url = ENV["DB_URL"]?
 
     def self.connection_url
       @@connection_url
@@ -59,8 +60,12 @@ module Micrate
     end
 
     private def self.validate_connection_url
+      if !@@connection_url && @@deprecated_connection_url
+        @@connection_url = @@deprecated_connection_url
+        Micrate.logger.info "DB_URL is deprecated. Please use DATABASE_URL instead"
+      end
       if !@@connection_url
-        raise "No database connection URL is configured. Please set the DB_URL environment variable."
+        raise "No database connection URL is configured. Please set the DATABASE_URL environment variable."
       end
     end
   end
